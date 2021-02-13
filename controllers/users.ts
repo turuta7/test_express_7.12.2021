@@ -1,6 +1,7 @@
 import Users from '../models/users'
+import jwt from 'jsonwebtoken'
 import {Request, Response} from 'express'
-import {validationEmail} from '../utils/checkingMail'
+
 
 const getAll = async (req: Request, res: Response) => {
     try {
@@ -35,4 +36,24 @@ const deleteUser = async (req: Request, res: Response) => {
     }
 }
 
-export default {create, deleteUser, getAll}
+const login = async (req: Request, res: Response) => {
+    const candidate = await Users.findOne({email: req.body.email});
+    if (candidate) {
+        const password = req.body.password;
+        console.log(password, candidate.password)
+        if (password === candidate.password) {
+            const token = await jwt.sign({
+                userId: candidate._id,
+                email: candidate.email
+            }, `${process.env.SECRET}`, {expiresIn: 60 * 60})
+
+            res.status(200).send({token: `Bearer ${token}`})
+        } else {
+            res.status(401).send({message: 'no password'})
+        }
+    } else {
+        res.status(404).send({message: 'no user'})
+    }
+};
+
+export default {create, deleteUser, getAll, login}

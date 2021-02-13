@@ -1,6 +1,14 @@
-const validationEmail = (email: string) => {
-    const re = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
-    return re.test(email);
-}
+import {NextFunction, Request, Response} from 'express'
 
-export {validationEmail}
+const validationEmail = (req: Request, res: Response, next: NextFunction) => {
+    const {email} = req.body;
+
+    const re = /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/;
+    if (re.test(email)) {
+        next();
+    } else {
+        res.send({message: 'error email'});
+    }
+};
+
+export {validationEmail};
